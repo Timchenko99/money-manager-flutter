@@ -1,6 +1,6 @@
 # moneymanager_simple
 
-A new Flutter application.
+Neumorphic money manager 
 
 ## Getting Started
 
