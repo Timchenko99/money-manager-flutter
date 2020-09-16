@@ -1,11 +1,13 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
-import '../data/UserPreferences.dart';
+import 'package:uuid/uuid.dart';
+
+import '../data/model/transaction.dart';
 import '../л.dart';
+import '../data/DBProvider.dart';
+
 
 class Add extends StatefulWidget {
   @override
@@ -13,12 +15,12 @@ class Add extends StatefulWidget {
 }
 
 class _AddState extends State<Add> {
-  final AmountTextController = TextEditingController();
+  final amountTextController = TextEditingController();
   int _selectedIndex = 0;
 
   @override
   void dispose() {
-    AmountTextController.dispose();
+    amountTextController.dispose();
     super.dispose();
   }
 
@@ -31,47 +33,6 @@ class _AddState extends State<Add> {
       body: SafeArea(
         child: Column(
           children: [
-            // Padding(
-            //   padding: const EdgeInsets.only(top: 20.0, left: 20.0),
-            //   child: Row(
-            //     children: [
-            //       Container(
-            //         width: 56,
-            //         height: 31,
-            //         decoration: BoxDecoration(
-            //             borderRadius: BorderRadius.circular(15),
-            //             color: Color.fromRGBO(193, 214, 233, 1),
-            //             boxShadow: [
-            //               BoxShadow(
-            //                   spreadRadius: -2,
-            //                   blurRadius: 8,
-            //                   offset: Offset(-4, -4),
-            //                   color: Colors.white),
-            //               BoxShadow(
-            //                   spreadRadius: 1,
-            //                   blurRadius: 10,
-            //                   offset: Offset(4, 4),
-            //                   color: Color.fromRGBO(146, 182, 216, 1))
-            //             ]),
-            //         child: Material(
-            //
-            //           color: Color.fromRGBO(193, 214, 233, 1),
-            //           borderRadius: BorderRadius.circular(15),
-            //           child: InkWell(
-            //             splashColor: Color.fromRGBO(193,214,233,1),
-            //             borderRadius: BorderRadius.circular(15),
-            //             onTap: ()=> Navigator.pop(context),
-            //             child: Icon(
-            //               Icons.keyboard_arrow_left,
-            //               size: 30,
-            //               color: Colors.black.withOpacity(0.4),
-            //             ),
-            //           ),
-            //         )
-            //       ),
-            //     ],
-            //   ),
-            // ),
             SizedBox(
               height: 25.0,
             ),
@@ -85,85 +46,9 @@ class _AddState extends State<Add> {
               height: 20,
             ),
             _buildNeumorphicToggle(),
-            // Container(
-            //   width: 310,
-            //   height: 52,
-            //   decoration: BoxDecoration(
-            //       borderRadius: BorderRadius.circular(15),
-            //       color: Color.fromRGBO(193, 214, 233, 1),
-            //       boxShadow: [
-            //         BoxShadow(
-            //             spreadRadius: -2,
-            //             blurRadius: 8,
-            //             offset: Offset(-4, -4),
-            //             color: Colors.white),
-            //         BoxShadow(
-            //             spreadRadius: 1,
-            //             blurRadius: 10,
-            //             offset: Offset(4, 4),
-            //             color: Color.fromRGBO(146, 182, 216, 1))
-            //       ]),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-            //     children: [
-            //       Text(
-            //         "Expenses",
-            //         style: GoogleFonts.roboto(
-            //             fontWeight: FontWeight.bold,
-            //             fontSize: 18.0,
-            //             color: Color.fromRGBO(156, 163, 170, 1)),
-            //       ),
-            //       Text(
-            //         "Income",
-            //         style: GoogleFonts.roboto(
-            //             fontWeight: FontWeight.bold,
-            //             fontSize: 18.0,
-            //             color: Color.fromRGBO(156, 163, 170, 1)),
-            //       )
-            //     ],
-            //   ),
-            // ),
             SizedBox(
               height: 50,
             ),
-            // Stack(
-            //   children: [
-            //     Align(
-            //       alignment: Alignment.center,
-            //       child: Container(
-            //         width: 350,
-            //         height: 51,
-            //         decoration: ConcaveDecoration(
-            //             shape: RoundedRectangleBorder(
-            //                 borderRadius: BorderRadius.circular(15)),
-            //             colors: [Colors.white, Colors.black],
-            //             depth: 3,
-            //             opacity: 0.7),
-            //       ),
-            //     ),
-            //     Align(
-            //       alignment: Alignment.center,
-            //       child: Container(
-            //         width: 300,
-            //         height: 51,
-            //         child: TextField(
-            //           textAlign: TextAlign.center,
-            //           controller: AmountTextController,
-            //           keyboardType: TextInputType.number,
-            //           decoration: InputDecoration(
-            //               border: InputBorder.none,
-            //               hintText: "Amount",
-            //               hintStyle: GoogleFonts.roboto(
-            //                   fontStyle: FontStyle.italic,
-            //                   fontSize: 18.0,
-            //                   color: Color.fromRGBO(0, 0, 0, 0.25))),
-            //           style: GoogleFonts.roboto(
-            //               fontSize: 18.0, color: Color.fromRGBO(0, 0, 0, 0.7)),
-            //         ),
-            //       ),
-            //     )
-            //   ],
-            // ),
             _buildNeumorphicTextField(),
             SizedBox(
               height: 30,
@@ -193,19 +78,24 @@ class _AddState extends State<Add> {
         theme: NeumorphicThemeData(),
         child: NeumorphicButton(
 
-          onPressed: (){
+          onPressed: () {
             FocusScope.of(context).requestFocus(FocusNode());
 
-            int currentBalance = UserPreferences().currentBalance;
-            int result = 0;
+            // double currentBalance = UserPreferences().currentBalance;
+            double result = 0;
 
             if(_selectedIndex == 0){
-              result = currentBalance - int.parse(AmountTextController.text);
+              result = -double.parse(amountTextController.text);
             }else{
-              result = currentBalance + int.parse(AmountTextController.text);
+              result = double.parse(amountTextController.text);
             }
             print("Result: $result");
-            UserPreferences().currentBalance = result;
+            // UserPreferences().currentBalance = result;
+            UserTransaction newTransaction = UserTransaction(id: Uuid().v1(), amount: result, type: _selectedIndex, day: DateTime.now().day, month: DateTime.now().month, year: DateTime.now().year, weekday: DateTime.now().weekday);
+
+            DBProvider.db.newTransaction(newTransaction);
+            // await DBProvider.db.getAllTransactions().then((value) => print(value));
+            // print();
             Navigator.pop(context);
           },
           
@@ -284,7 +174,7 @@ class _AddState extends State<Add> {
             FocusScope.of(context).requestFocus(FocusNode());
           },
           textAlign: TextAlign.center,
-          controller: AmountTextController,
+          controller: amountTextController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
               border: InputBorder.none,
@@ -329,13 +219,13 @@ class _AddState extends State<Add> {
   }
 
   void _incrementAmountBy(int increment) {
-    if (AmountTextController.text.isEmpty) AmountTextController.text = "0";
+    if (amountTextController.text.isEmpty) amountTextController.text = "0";
 
-    int value = int.parse(AmountTextController.text
+    int value = int.parse(amountTextController.text
  ?? "0"
     );
 
-    AmountTextController.text = (value + increment).toString();
+    amountTextController.text = (value + increment).toString();
   }
 }
 

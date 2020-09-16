@@ -23,12 +23,21 @@ class UserPreferences{
     _prefs.setInt("monthBalance", newValue);
   }
 
-  get currentBalance{
-    return (_prefs.getInt("currentBalance") ?? 50);
+  get dailyGoal{
+    return (_prefs.getInt("dailyGoal") ?? 1);
   }
 
-  set currentBalance(int newValue){
-    _prefs.setInt("currentBalance", newValue);
+  set dailyGoal(int newValue){
+    _prefs.setInt("dailyGoal", newValue);
+  }
+
+
+  get goal{
+    return (_prefs.getInt("goal") ?? "None");
+  }
+
+  set goal(int newValue){
+    _prefs.setInt("goal", newValue);
   }
 
 }

@@ -1,8 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
+import '../data/DBProvider.dart';
+import '../data/UserPreferences.dart';
 
 class Overview extends StatefulWidget {
   @override
@@ -11,6 +13,7 @@ class Overview extends StatefulWidget {
 
 class _OverviewState extends State<Overview> {
   int _selectedIndex = 0;
+
 
   @override
   Widget build(BuildContext context) {
@@ -24,38 +27,60 @@ class _OverviewState extends State<Overview> {
             SizedBox(height: 35),
             _buildNeumorphicToggle(context),
             SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Mon"),
-                SizedBox(width: 20),
-                NeumorphicBar(width: 70, height: 200, value: 0.1, text: "Tue"),
-                SizedBox(width: 20),
-                NeumorphicBar(width: 70, height: 200, value: 0.9, text: "Wed"),
-                SizedBox(width: 20),
-                NeumorphicBar(width: 70, height: 200, value: 0.2, text: "Thu"),
-                SizedBox(width: 20),
-                NeumorphicBar(width: 70, height: 200, value: 0.4, text: "Fri"),
-                SizedBox(width: 20),
-                NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Sat"),
-                SizedBox(width: 20),
-                NeumorphicBar(width: 70, height: 200, value: 0.6, text: "Sun"),
+            FutureBuilder(
+              future: DBProvider.db.getWeekTransactions(),
+              builder: (ctx, snapshot){
+                if (snapshot.data != null && snapshot.data.isNotEmpty) {
+                  // print(snapshot.data);
 
-              ],
+                 return Row(mainAxisAlignment: MainAxisAlignment.center,children: snapshot.data.map<Widget>((v)=>NeumorphicBar(width: 70, height: 200, value: 0.1, text: "${v.day}"),).toList() );
+
+                }else return Row(mainAxisAlignment: MainAxisAlignment.center,children: [
+                  NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Mon"),
+                  SizedBox(width: 20),
+                  NeumorphicBar(width: 70, height: 200, value: 0.1, text: "Tue"),
+                  SizedBox(width: 20),
+                  NeumorphicBar(width: 70, height: 200, value: 0.9, text: "Wed"),
+                  SizedBox(width: 20),
+                  NeumorphicBar(width: 70, height: 200, value: 0.2, text: "Thu"),
+                  SizedBox(width: 20),
+                  NeumorphicBar(width: 70, height: 200, value: 0.4, text: "Fri"),
+                  SizedBox(width: 20),
+                  NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Sat"),
+                  SizedBox(width: 20),
+                  NeumorphicBar(width: 70, height: 200, value: 0.6, text: "Sun"),]);
+              },
             ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children:  /*[
+            //     NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Mon"),
+            //     SizedBox(width: 20),
+            //     NeumorphicBar(width: 70, height: 200, value: 0.1, text: "Tue"),
+            //     SizedBox(width: 20),
+            //     NeumorphicBar(width: 70, height: 200, value: 0.9, text: "Wed"),
+            //     SizedBox(width: 20),
+            //     NeumorphicBar(width: 70, height: 200, value: 0.2, text: "Thu"),
+            //     SizedBox(width: 20),
+            //     NeumorphicBar(width: 70, height: 200, value: 0.4, text: "Fri"),
+            //     SizedBox(width: 20),
+            //     NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Sat"),
+            //     SizedBox(width: 20),
+            //     NeumorphicBar(width: 70, height: 200, value: 0.6, text: "Sun"),
+            //   ],*/
+            // ),
             SizedBox(height: 20),
             Neumorphic(
               style: NeumorphicStyle(
-                shape: NeumorphicShape.flat,
-                color: Theme.of(context).backgroundColor
-              ),
+                  shape: NeumorphicShape.flat,
+                  color: Theme.of(context).backgroundColor),
               child: Container(
                 width: 340,
                 height: 72,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Stack(
                   children: [
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -63,18 +88,34 @@ class _OverviewState extends State<Overview> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Current Goal", style: TextStyle(fontSize: 14),),
+                            Text(
+                              "Current Goal",
+                              style: TextStyle(fontSize: 14),
+                            ),
                             SizedBox(height: 4),
-                            Text("Car Upgrade", style: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1))/*TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1))*/)
+                            Text("${UserPreferences().goal}",
+                                style: GoogleFonts.roboto(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromRGBO(90, 90, 90,
+                                        1)) /*TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1))*/)
                           ],
                         ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text("Target Amount", style: TextStyle(fontSize: 14),),
+                            Text(
+                              "Target Amount",
+                              style: TextStyle(fontSize: 14),
+                            ),
                             SizedBox(height: 4),
-                            Text("\$65 000", style:GoogleFonts.rubik(fontSize: 20, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1))/* TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1)*/)
+                            Text("\$${UserPreferences().monthBalance}",
+                                style: GoogleFonts.rubik(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromRGBO(90, 90, 90,
+                                        1)) /* TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1)*/)
                           ],
                         )
                       ],
@@ -83,24 +124,20 @@ class _OverviewState extends State<Overview> {
                 ),
               ),
             )
-
-
           ],
         ),
-
       ),
     );
   }
 
-  Widget _buildOverviewBar(BuildContext context){
+  Widget _buildOverviewBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 15.0),
       child: Neumorphic(
         style: NeumorphicStyle(
             shape: NeumorphicShape.flat,
             color: Theme.of(context).backgroundColor,
-            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15))
-        ),
+            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15))),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           width: 340,
@@ -111,17 +148,48 @@ class _OverviewState extends State<Overview> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Total Amount Saved", style: Theme.of(context).textTheme.subtitle2),
+                  Text("Total Amount Saved",
+                      style: Theme.of(context).textTheme.subtitle2),
                   SizedBox(height: 10),
-                  Text("\$240 000.20", style: Theme.of(context).textTheme.headline5),
+                  FutureBuilder(
+                    future: DBProvider.db.getAllTransactions(),
+                    builder: (context, snapshot) {
+                      num temp = snapshot.data?.fold(0, (prev, elem) => prev + elem.amount) ?? 0;
+
+                      return Text("\$$temp",
+                          style: Theme.of(context).textTheme.headline5);
+                    },
+                  ),
                   SizedBox(height: 25),
-                  Text("You have reached 13% of your goal")
+                  FutureBuilder(
+                    future: DBProvider.db.getAllTransactions(),
+                    builder: (context, snapshot){
+                      num temp = snapshot.data?.fold(0, (prev, elem) => prev + elem.amount) ?? 0 / UserPreferences().monthBalance;
+                      String formattedText = NumberFormat("##0%").format(temp);
+
+                      return Text("You have reached $formattedText of your goal");
+                    },
+                  )
                 ],
               ),
               Positioned(
                 right: 0,
-                top: 0,
-                child: NeumorphicIcon(Icons.settings, size: 28, style: NeumorphicStyle(color: Color.fromRGBO(90, 90, 90, 1)),),
+                top: 50,
+                child: NeumorphicTheme(
+                  child: NeumorphicButton(
+                    style: NeumorphicStyle(
+                      shape: NeumorphicShape.convex,
+                      boxShape: NeumorphicBoxShape.circle()
+                      // boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15))
+                    ),
+                    onPressed: (){},
+                    child: NeumorphicIcon(
+                      Icons.settings,
+                      size: 28,
+                      style: NeumorphicStyle(color: Color.fromRGBO(90, 90, 90, 1)),
+                    ),
+                  ),
+                )
               )
               // Positioned(
               //     top: 20,
@@ -143,7 +211,6 @@ class _OverviewState extends State<Overview> {
               //     left: 50,
               //     child: Text("You have reached 13% of your goal")
               // ),
-
             ],
           ),
         ),
@@ -151,12 +218,12 @@ class _OverviewState extends State<Overview> {
     );
   }
 
-  Widget _buildNeumorphicToggle(BuildContext context){
+  Widget _buildNeumorphicToggle(BuildContext context) {
     return NeumorphicToggle(
       height: 50,
       width: 340,
       selectedIndex: _selectedIndex,
-      onChanged: (v){
+      onChanged: (v) {
         setState(() {
           _selectedIndex = v;
         });
@@ -166,28 +233,40 @@ class _OverviewState extends State<Overview> {
         backgroundColor: Color.fromRGBO(208, 218, 227, 1),
       ),
       children: [
-        ToggleElement(background: Center(child: Text("This Week", style: Theme.of(context).textTheme.bodyText1 )), foreground: Center(child: Text("This Week", style: Theme.of(context).textTheme.bodyText1))),
-        ToggleElement(background: Center(child: Text("This Month", style: Theme.of(context).textTheme.bodyText1 )), foreground: Center(child: Text("This Month", style: Theme.of(context).textTheme.bodyText1)))
+        ToggleElement(
+            background: Center(
+                child: Text("This Week",
+                    style: Theme.of(context).textTheme.bodyText1)),
+            foreground: Center(
+                child: Text("This Week",
+                    style: Theme.of(context).textTheme.bodyText1))),
+        ToggleElement(
+            background: Center(
+                child: Text("This Month",
+                    style: Theme.of(context).textTheme.bodyText1)),
+            foreground: Center(
+                child: Text("This Month",
+                    style: Theme.of(context).textTheme.bodyText1)))
       ],
       thumb: Neumorphic(
         style: NeumorphicStyle(
             color: Theme.of(context).backgroundColor,
-            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.all(Radius.circular(15))),
-            shape: NeumorphicShape.flat
-        ),
+            boxShape: NeumorphicBoxShape.roundRect(
+                BorderRadius.all(Radius.circular(15))),
+            shape: NeumorphicShape.flat),
       ),
     );
   }
 
-  Widget _buildNeumorphicBarChart(BuildContext context){
-    return LayoutBuilder(
-      // builder: (),
-    );
-  }
+  // Widget _buildNeumorphicBarChart(BuildContext context) {
+  //   return LayoutBuilder(
+  //       // builder: (),
+  //       );
+  // }
 
-  Widget _buildNeumorphicLineChart(){
-    return Container();
-  }
+  // Widget _buildNeumorphicLineChart() {
+  //   return Container();
+  // }
 }
 //
 // class Overview extends StatelessWidget {
@@ -365,13 +444,11 @@ class InnerContainer extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 5.0),
         child: Neumorphic(
           style: NeumorphicStyle(
-            color: Theme.of(context).accentColor,
-            shape: NeumorphicShape.flat
-          ),
+              color: Theme.of(context).accentColor,
+              shape: NeumorphicShape.flat),
           child: Container(
             height: height * 1.02,
-            width: width ,
-
+            width: width,
           ),
         ),
       ),
@@ -392,17 +469,12 @@ class DugContainer extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Neumorphic(
-        style: NeumorphicStyle(
-          depth: -5,
-          color: Colors.grey.withOpacity(0.1)
-        ),
+        style: NeumorphicStyle(depth: -5, color: Colors.grey.withOpacity(0.1)),
         child: Container(
           height: height /** 600 / 896*/,
           width: width /** 100 / 414*/,
-
         ),
       ),
     );
   }
 }
-
