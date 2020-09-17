@@ -272,6 +272,7 @@ class _CircleApplyButtonState extends State<CircleApplyButton> {
                 borderRadius: BorderRadius.circular(200)),
             colors: [Colors.white, Colors.black],
             depth: 5,
+
             opacity: 0.7),
         child: Icon(
           Icons.check,

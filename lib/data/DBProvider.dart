@@ -76,6 +76,23 @@ class DBProvider {
     return list;
   }
 
+  Future<List<UserTransaction>> getSumByDay() async{
+    final db = await database;
+
+    var res = await db.rawQuery('''
+      SELECT id, SUM(amount)amount, type, day, month, year, weekday
+      FROM transactions
+      GROUP BY day, month, year
+      ORDER BY day DESC, month DESC, year DESC;
+    
+    ''');
+
+    List<UserTransaction> list =
+    res.isNotEmpty ? res.map((c) => UserTransaction.fromJson(c)).toList() : [];
+
+    return list;
+  }
+
   Future<int> newTransaction(UserTransaction newTransaction) async{
     final db = await database;
 

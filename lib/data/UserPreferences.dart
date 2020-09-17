@@ -15,29 +15,36 @@ class UserPreferences{
     _prefs = await SharedPreferences.getInstance();
   }
 
-  get monthBalance{
-    return (_prefs.getInt("monthBalance") ?? 100);
+  get isFirstBoot{
+    return (_prefs.getBool("isFirstBoot") ?? true);
   }
 
-  set monthBalance(int newValue){
-    _prefs.setInt("monthBalance", newValue);
+  set isFirstBoot(bool newValue){
+    _prefs.setBool("isFirstBoot", newValue);
   }
 
-  get dailyGoal{
-    return (_prefs.getInt("dailyGoal") ?? 1);
+  get targetAmount{
+    return (_prefs.getInt("targetAmount") ?? 0);
   }
 
-  set dailyGoal(int newValue){
-    _prefs.setInt("dailyGoal", newValue);
+  set targetAmount(int newValue){
+    _prefs.setInt("targetAmount", newValue);
   }
 
+  get dailyBudget{
+    return (_prefs.getInt("dailyBudget") ?? 1);
+  }
+
+  set dailyBudget(int newValue){
+    _prefs.setInt("dailyBudget", newValue);
+  }
 
   get goal{
-    return (_prefs.getInt("goal") ?? "None");
+    return (_prefs.getString("goal") ?? "None");
   }
 
-  set goal(int newValue){
-    _prefs.setInt("goal", newValue);
+  set goal(String newValue){
+    _prefs.setString("goal", newValue);
   }
 
 }

@@ -142,7 +142,7 @@ class NeumorphicPieChart extends StatelessWidget {
                             ]),
                         child: Center(
                           child: Text(
-                              "${NumberFormat("##0%").format(/*transactions.fold(0, (previousValue, element) => previousValue + element.amount)*/ 1 / UserPreferences().monthBalance)}",
+                              "${NumberFormat("##0%").format(/*transactions.fold(0, (previousValue, element) => previousValue + element.amount)*/ 1 / UserPreferences().dailyBudget)}",
                               style: GoogleFonts.rubik(
                                   fontWeight: FontWeight.bold,
                                   fontStyle: FontStyle.italic,
@@ -195,7 +195,7 @@ class PieChartPainter extends CustomPainter {
     canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startRadian,
-        ( (1  / UserPreferences().monthBalance) * 2 * pi ),
+        ( (1  / UserPreferences().dailyBudget) * 2 * pi ),
         false,
         paint);
 

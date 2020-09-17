@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'dart:math';
 
 import '../data/DBProvider.dart';
 import '../data/UserPreferences.dart';
+
+import './Add.dart';
+import './Settings.dart';
 
 class Overview extends StatefulWidget {
   @override
@@ -16,8 +20,36 @@ class _OverviewState extends State<Overview> {
 
 
   @override
+  void initState() {
+    super.initState();
+    // DBProvider.db.deleteAll();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    const Map<int, String> weekdayToInt = {1:"Mon", 2:"Tue", 3:"Wed", 4:"Thu",5:"Fri",6:"Sat",7:"Sun"};
+
     return Scaffold(
+      floatingActionButton:  NeumorphicTheme(
+        theme: NeumorphicThemeData(),
+        child: NeumorphicButton(
+          key: UniqueKey(),
+          onPressed: () async {
+            await Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Add()));
+            //print("redraw");
+            setState(() {});
+          },
+          style: NeumorphicStyle(
+              shape: NeumorphicShape.concave,
+              intensity: 0.8,
+              color: Theme.of(context).accentColor,
+              boxShape: NeumorphicBoxShape.circle()),
+          child: Icon(Icons.add,
+              size: 40, color: Colors.black.withOpacity(0.6),),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).backgroundColor,
       body: SafeArea(
@@ -30,10 +62,10 @@ class _OverviewState extends State<Overview> {
             FutureBuilder(
               future: DBProvider.db.getWeekTransactions(),
               builder: (ctx, snapshot){
-                if (snapshot.data != null && snapshot.data.isNotEmpty) {
-                  // print(snapshot.data);
+                if (snapshot.connectionState == ConnectionState.done && snapshot.data != null && snapshot.data.isNotEmpty) {
+                  print(snapshot.data[0].amount);
 
-                 return Row(mainAxisAlignment: MainAxisAlignment.center,children: snapshot.data.map<Widget>((v)=>NeumorphicBar(width: 70, height: 200, value: 0.1, text: "${v.day}"),).toList() );
+                 return Row(mainAxisAlignment: MainAxisAlignment.center,children: snapshot.data.map<Widget>((v)=>NeumorphicBar(width: 70, height: 200, value: v.amount.abs()  / UserPreferences().dailyBudget, text: "${weekdayToInt[v.weekday]}"),).toList() );
 
                 }else return Row(mainAxisAlignment: MainAxisAlignment.center,children: [
                   NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Mon"),
@@ -70,58 +102,51 @@ class _OverviewState extends State<Overview> {
             //   ],*/
             // ),
             SizedBox(height: 20),
-            Neumorphic(
-              style: NeumorphicStyle(
-                  shape: NeumorphicShape.flat,
-                  color: Theme.of(context).backgroundColor),
-              child: Container(
-                width: 340,
-                height: 72,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Stack(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Current Goal",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            SizedBox(height: 4),
-                            Text("${UserPreferences().goal}",
-                                style: GoogleFonts.roboto(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromRGBO(90, 90, 90,
-                                        1)) /*TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1))*/)
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "Target Amount",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            SizedBox(height: 4),
-                            Text("\$${UserPreferences().monthBalance}",
-                                style: GoogleFonts.rubik(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromRGBO(90, 90, 90,
-                                        1)) /* TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1)*/)
-                          ],
-                        )
-                      ],
-                    )
-                  ],
-                ),
+            Container(
+              width: 340,
+              height: 72,
+              child: Stack(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Current Goal",
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          SizedBox(height: 4),
+                          Text("${UserPreferences().goal}",
+                              style: GoogleFonts.roboto(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(90, 90, 90,
+                                      1)) /*TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1))*/)
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Target Amount",
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          SizedBox(height: 4),
+                          Text("\$${UserPreferences().targetAmount}",
+                              style: GoogleFonts.rubik(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(90, 90, 90,
+                                      1)) /* TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(90, 90, 90, 1)*/)
+                        ],
+                      )
+                    ],
+                  )
+                ],
               ),
             )
           ],
@@ -152,9 +177,10 @@ class _OverviewState extends State<Overview> {
                       style: Theme.of(context).textTheme.subtitle2),
                   SizedBox(height: 10),
                   FutureBuilder(
-                    future: DBProvider.db.getAllTransactions(),
+                    future: DBProvider.db.getSumByDay(),
                     builder: (context, snapshot) {
-                      num temp = snapshot.data?.fold(0, (prev, elem) => prev + elem.amount) ?? 0;
+                      //print(snapshot.data[0].amount);
+                      num temp = snapshot.data?.fold(0, (prev, elem) => prev + (UserPreferences().dailyBudget + elem.amount)) ?? 0;
 
                       return Text("\$$temp",
                           style: Theme.of(context).textTheme.headline5);
@@ -162,9 +188,9 @@ class _OverviewState extends State<Overview> {
                   ),
                   SizedBox(height: 25),
                   FutureBuilder(
-                    future: DBProvider.db.getAllTransactions(),
+                    future: DBProvider.db.getSumByDay(),
                     builder: (context, snapshot){
-                      num temp = snapshot.data?.fold(0, (prev, elem) => prev + elem.amount) ?? 0 / UserPreferences().monthBalance;
+                      num temp = snapshot.data?.fold(0, (prev, elem) => prev + (UserPreferences().dailyBudget + elem.amount)) ?? 0 / UserPreferences().targetAmount;
                       String formattedText = NumberFormat("##0%").format(temp);
 
                       return Text("You have reached $formattedText of your goal");
@@ -174,19 +200,25 @@ class _OverviewState extends State<Overview> {
               ),
               Positioned(
                 right: 0,
-                top: 50,
+                top: 60,
                 child: NeumorphicTheme(
                   child: NeumorphicButton(
                     style: NeumorphicStyle(
-                      shape: NeumorphicShape.convex,
+                      shape: NeumorphicShape.flat,
                       boxShape: NeumorphicBoxShape.circle()
                       // boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15))
                     ),
-                    onPressed: (){},
-                    child: NeumorphicIcon(
+                    onPressed: () async{
+                      await Navigator.push(
+                          context, MaterialPageRoute(builder: (context) => Settings()));
+                      setState(() {
+
+                      });
+                    },
+                    child: Icon(
                       Icons.settings,
                       size: 28,
-                      style: NeumorphicStyle(color: Color.fromRGBO(90, 90, 90, 1)),
+                      color: Color.fromRGBO(90, 90, 90, 1),
                     ),
                   ),
                 )
@@ -478,3 +510,5 @@ class DugContainer extends StatelessWidget {
     );
   }
 }
+
+
