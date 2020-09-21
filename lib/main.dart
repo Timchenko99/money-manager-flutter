@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moneymanager_simple/data/UserPreferences.dart';
 
-import './screens/Home.dart';
 import './screens/Overview.dart';
 
 void main() async {
@@ -76,6 +75,7 @@ class _MyAppState extends State<MyApp> {
           // closer together (more dense) than on mobile platforms.
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: Overview());
+        home: Overview()
+    );
   }
 }

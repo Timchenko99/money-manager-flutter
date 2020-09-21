@@ -8,7 +8,7 @@ import 'dart:math';
 
 import './Add.dart';
 
-import '../data/DBProvider.dart';
+import '../data/DBHelper.dart';
 import '../data/model/transaction.dart';
 import '../data/UserPreferences.dart';
 
@@ -56,7 +56,7 @@ class _HomeState extends State<Home> {
             ),
             SizedBox(height: 70),
             FutureBuilder(
-              future: DBProvider.db.getAllTransactions(),
+              future: DBHelper().getAllTransactions(),
               builder: (context, snapshot){
                 if(snapshot.connectionState == ConnectionState.done)
                   return NeumorphicPieChart(snapshot.data);

@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../data/model/transaction.dart';
 import '../л.dart';
-import '../data/DBProvider.dart';
+import '../data/DBHelper.dart';
 
 
 class Add extends StatefulWidget {
@@ -66,49 +66,11 @@ class _AddState extends State<Add> {
               height: 50,
             ),
             // CircleApplyButton(),
-            _buildCircleSubmitButton()
+            CircleSubmitButton(amountTextController, _selectedIndex),
+            // _buildCircleSubmitButton()
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCircleSubmitButton(){
-    return NeumorphicTheme(
-        theme: NeumorphicThemeData(),
-        child: NeumorphicButton(
-
-          onPressed: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-
-            // double currentBalance = UserPreferences().currentBalance;
-            double result = 0;
-
-            if(_selectedIndex == 0){
-              result = -double.parse(amountTextController.text);
-            }else{
-              result = double.parse(amountTextController.text);
-            }
-            print("Result: $result");
-            // UserPreferences().currentBalance = result;
-            UserTransaction newTransaction = UserTransaction(id: Uuid().v1(), amount: result, type: _selectedIndex, day: DateTime.now().day, month: DateTime.now().month, year: DateTime.now().year, weekday: DateTime.now().weekday);
-
-            DBProvider.db.newTransaction(newTransaction);
-            // await DBProvider.db.getAllTransactions().then((value) => print(value));
-            // print();
-            Navigator.pop(context);
-          },
-          
-          style: NeumorphicStyle(
-              color: Theme.of(context).backgroundColor,
-              shape: NeumorphicShape.flat,
-              boxShape: NeumorphicBoxShape.circle()
-          ),
-          child: Container(
-              width: 253,
-              height: 253,
-              child: Icon(Icons.check, size: 80, color: Color.fromRGBO(116, 116, 116, 1))),
-        )
     );
   }
 
@@ -228,6 +190,59 @@ class _AddState extends State<Add> {
     amountTextController.text = (value + increment).toString();
   }
 }
+
+class CircleSubmitButton extends StatelessWidget {
+
+  final TextEditingController _amountTextController;
+  int _selectedIndex = 0;
+
+
+  CircleSubmitButton(this._amountTextController, this._selectedIndex);
+
+  @override
+  Widget build(BuildContext context) {
+
+    return  NeumorphicTheme(
+          theme: NeumorphicThemeData(),
+          child: NeumorphicButton(
+
+            onPressed: () {
+              FocusScope.of(context).requestFocus(FocusNode());
+
+              // double currentBalance = UserPreferences().currentBalance;
+              double result = 0;
+
+              if(_selectedIndex == 0){
+                result = - double.parse(_amountTextController.text);
+              }else{
+                result = double.parse(_amountTextController.text);
+              }
+              print("Result: $result");
+              // UserPreferences().currentBalance = result;
+              UserTransaction newTransaction = UserTransaction(id: Uuid().v1(), amount: result, type: _selectedIndex, day: DateTime.now().day, month: DateTime.now().month, year: DateTime.now().year, weekday: DateTime.now().weekday);
+
+              DBHelper().newTransaction(newTransaction);
+              // await DBProvider.db.getAllTransactions().then((value) => print(value));
+              // print();
+              Navigator.pop(context);
+            },
+
+            style: NeumorphicStyle(
+                color: Theme.of(context).backgroundColor,
+                shape: NeumorphicShape.flat,
+                boxShape: NeumorphicBoxShape.circle()
+            ),
+            child: Container(
+                width: 253,
+                height: 253,
+                child: Icon(Icons.check, size: 80, color: Color.fromRGBO(116, 116, 116, 1))),
+          ),
+
+
+    );
+  }
+}
+
 
 class CircleApplyButton extends StatefulWidget {
   @override

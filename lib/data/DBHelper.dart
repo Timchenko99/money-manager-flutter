@@ -1,15 +1,21 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import './model/transaction.dart';
 
-class DBProvider {
-  DBProvider._();
-  static final DBProvider db = DBProvider._();
+class DBHelper with ChangeNotifier{
+  static final DBHelper _instance = DBHelper._ctor();
 
+  DBHelper._ctor();
+
+
+  factory DBHelper(){
+    return _instance;
+  }
 
   static Database _database;
   Future<Database> get database async {
@@ -17,6 +23,7 @@ class DBProvider {
 
     // if _database is null we instantiate it
     _database = await initDB();
+    notifyListeners();
     return _database;
   }
 
@@ -56,6 +63,15 @@ class DBProvider {
           "weekday INTEGER"
           ")");
     });
+
+  }
+
+  Future<void> insert(String table, Map<String, Object> data) async {
+    await _database.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<Map<String, dynamic>>> getData(String table) async {
+    return await _database.query(table);
   }
 
   Future<List<UserTransaction>> getWeekTransactions() async{
@@ -96,7 +112,7 @@ class DBProvider {
   Future<int> newTransaction(UserTransaction newTransaction) async{
     final db = await database;
 
-    return await db.rawInsert('''
+    int result = await db.rawInsert('''
       INSERT INTO transactions(
         amount,
         type,
@@ -106,6 +122,10 @@ class DBProvider {
         weekday
       ) VALUES(?,?,?,?,?,?)
     ''', [newTransaction.amount, newTransaction.type, newTransaction.day, newTransaction.month, newTransaction.year, newTransaction.weekday]);
+
+    notifyListeners();
+
+    return result;
   }
 
   Future<UserTransaction> getTransaction(int id) async{
@@ -124,18 +144,21 @@ class DBProvider {
 
   Future<int> updateTransaction(UserTransaction newTransaction) async {
     final db = await database;
-    var res = await db.update("transactions", newTransaction.toJson(),
+    int res = await db.update("transactions", newTransaction.toJson(),
         where: "id = ?", whereArgs: [newTransaction.id]);
+    notifyListeners();
     return res;
   }
 
   void delete(int id) async {
     final db = await database;
     db.delete("transactions", where: "id = ?", whereArgs: [id]);
+    notifyListeners();
   }
 
   void deleteAll() async {
     final db = await database;
     db.rawDelete("DELETE FROM transactions");
+    notifyListeners();
   }
 }
