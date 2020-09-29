@@ -68,6 +68,7 @@ class DBHelper with ChangeNotifier{
 
   Future<void> insert(String table, Map<String, Object> data) async {
     await _database.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
+    notifyListeners();
   }
 
   Future<List<Map<String, dynamic>>> getData(String table) async {

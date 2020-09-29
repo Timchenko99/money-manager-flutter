@@ -5,7 +5,6 @@ import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/model/transaction.dart';
-import '../л.dart';
 import '../data/DBHelper.dart';
 
 
@@ -15,12 +14,12 @@ class Add extends StatefulWidget {
 }
 
 class _AddState extends State<Add> {
-  final amountTextController = TextEditingController();
+  final _amountTextController = TextEditingController();
   int _selectedIndex = 0;
 
   @override
   void dispose() {
-    amountTextController.dispose();
+    _amountTextController.dispose();
     super.dispose();
   }
 
@@ -65,9 +64,7 @@ class _AddState extends State<Add> {
             SizedBox(
               height: 50,
             ),
-            // CircleApplyButton(),
-            CircleSubmitButton(amountTextController, _selectedIndex),
-            // _buildCircleSubmitButton()
+            CircleSubmitButton(_amountTextController),
           ],
         ),
       ),
@@ -89,32 +86,6 @@ class _AddState extends State<Add> {
           ),
         )
     );
-    //  Container(
-    //   width: 70,
-    //   height: 40,
-    //   decoration: BoxDecoration(
-    //       borderRadius: BorderRadius.circular(15),
-    //       color: Theme.of(context).backgroundColor,
-    //       boxShadow: [
-    //         BoxShadow(
-    //             spreadRadius: -2,
-    //             blurRadius: 8,
-    //             offset: Offset(-4, -4),
-    //             color: Colors.white),
-    //         BoxShadow(
-    //             spreadRadius: -1,
-    //             blurRadius: 13,
-    //             offset: Offset(4, 4),
-    //             color: Color.fromRGBO(146, 182, 216, 1))
-    //       ]),
-    //   child: FlatButton(
-    //     splashColor: Colors.pinkAccent.withOpacity(0.5),
-    //     shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(15)),
-    //     child: Text("$amount\$", style: Theme.of(context).textTheme.button ),
-    //     onPressed: () => _incrementAmountBy(amount),
-    //   ),
-    // );
   }
 
 
@@ -136,7 +107,7 @@ class _AddState extends State<Add> {
             FocusScope.of(context).requestFocus(FocusNode());
           },
           textAlign: TextAlign.center,
-          controller: amountTextController,
+          controller: _amountTextController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
               border: InputBorder.none,
@@ -181,23 +152,29 @@ class _AddState extends State<Add> {
   }
 
   void _incrementAmountBy(int increment) {
-    if (amountTextController.text.isEmpty) amountTextController.text = "0";
+    if (_amountTextController.text.isEmpty) _amountTextController.text = "0";
 
-    int value = int.parse(amountTextController.text
+    int value = int.parse(_amountTextController.text
  ?? "0"
     );
 
-    amountTextController.text = (value + increment).toString();
+    _amountTextController.text = (value + increment).toString();
   }
 }
 
-class CircleSubmitButton extends StatelessWidget {
-
+class CircleSubmitButton extends StatefulWidget {
   final TextEditingController _amountTextController;
+
+
+  CircleSubmitButton(this._amountTextController);
+
+  @override
+  _CircleSubmitButtonState createState() => _CircleSubmitButtonState();
+}
+
+class _CircleSubmitButtonState extends State<CircleSubmitButton> {
+
   int _selectedIndex = 0;
-
-
-  CircleSubmitButton(this._amountTextController, this._selectedIndex);
 
   @override
   Widget build(BuildContext context) {
@@ -213,9 +190,9 @@ class CircleSubmitButton extends StatelessWidget {
               double result = 0;
 
               if(_selectedIndex == 0){
-                result = - double.parse(_amountTextController.text);
+                result = -double.parse(widget._amountTextController.text ?? 0);
               }else{
-                result = double.parse(_amountTextController.text);
+                result = double.parse(widget._amountTextController.text ?? 0);
               }
               print("Result: $result");
               // UserPreferences().currentBalance = result;
@@ -239,62 +216,6 @@ class CircleSubmitButton extends StatelessWidget {
           ),
 
 
-    );
-  }
-}
-
-
-class CircleApplyButton extends StatefulWidget {
-  @override
-  _CircleApplyButtonState createState() => _CircleApplyButtonState();
-}
-
-class _CircleApplyButtonState extends State<CircleApplyButton> {
-  bool isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (e) => setState((){
-        isPressed = true;
-      }),
-      onPointerUp: (e) => setState(() {
-        isPressed = false;
-        Navigator.pop(context);
-      }),
-      child: Container(
-        width: 253,
-        height: 253,
-        decoration: !isPressed
-            ? BoxDecoration(
-
-            color: Color.fromRGBO(193, 214, 233, 1),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                  spreadRadius: -10,
-                  blurRadius: 17,
-                  offset: Offset(-5, -5),
-                  color: Colors.white),
-              BoxShadow(
-                  spreadRadius: -2,
-                  blurRadius: 10,
-                  offset: Offset(7, 7),
-                  color: Color.fromRGBO(146, 182, 216, 1))
-            ])
-            : ConcaveDecoration(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(200)),
-            colors: [Colors.white, Colors.black],
-            depth: 5,
-
-            opacity: 0.7),
-        child: Icon(
-          Icons.check,
-          size: 52,
-          color: Colors.black.withOpacity(0.4),
-        ),
-      ),
     );
   }
 }

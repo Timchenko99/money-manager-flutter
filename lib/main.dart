@@ -1,13 +1,28 @@
+import 'package:android_alarm_manager/android_alarm_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moneymanager_simple/data/UserPreferences.dart';
 
 import './screens/Overview.dart';
+import './screens/Start.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final int scheduleID = 1;
+
+  await AndroidAlarmManager.initialize();
   await UserPreferences().init();
+
   runApp(MyApp());
+
+  await AndroidAlarmManager.periodic(Duration(days: 1), scheduleID, scheduler, startAt:DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day+1));
+}
+
+void scheduler(){
+  // final DateTime now = DateTime.now();
+  // DBHelper().newTransaction(UserTransaction(id: Uuid().v1(), amount: 0, type: 0, day: now.day, month: now.month, year: now.year, weekday: now.weekday));
+  print("Scheduler!");
 }
 
 class MyApp extends StatefulWidget {
@@ -21,19 +36,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
-        theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
+        theme: //_buildTheme(),
+        ThemeData(
           primarySwatch: Colors.pink,
           backgroundColor: Color.fromRGBO(218, 227, 235, 1),
           accentColor: Color.fromRGBO(228, 168, 168, 1),
+          //primaryColorLight: Color(0xFFEEFFFF),
+          //primaryColorDark: Color(0xFF8AACC8),
           textTheme: TextTheme(
             headline1:
                 GoogleFonts.roboto(color: Color.fromRGBO(116, 116, 116, 1)),
@@ -75,7 +84,7 @@ class _MyAppState extends State<MyApp> {
           // closer together (more dense) than on mobile platforms.
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: Overview()
+        home: (UserPreferences().isFirstBoot ? Start():Overview())
     );
   }
 }

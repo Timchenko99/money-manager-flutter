@@ -162,6 +162,24 @@ class BarChart extends StatelessWidget {
     return  FutureBuilder(
       future: weekTransactions,
         builder: (ctx, snapshot){
+        // showDialog(
+        //   context: context,
+        //   builder: (_) => AlertDialog(
+        //     title: Text("Congratulations!"),
+        //     content: Text("You have reached your goal! Create new?"),
+        //     actions: [
+        //       FlatButton(
+        //         child: Text("No"),
+        //         onPressed: ()=>print("No")
+        //       ),
+        //       FlatButton(
+        //         child: Text("Yes"),
+        //         onPressed: ()=>print("Yes"),
+        //       )
+        //     ],
+        //   ),
+        //   barrierDismissible: false
+        // );
           final data = snapshot.data as List;
           // print(DateTime(2020, 9, -1));
 
@@ -333,7 +351,7 @@ class SavedPercent extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     final prefs = Provider.of<UserPreferences>(context);
-    final sumByDay = DBHelper().getSumByDay();
+    final sumByDay = Provider.of<DBHelper>(context).getSumByDay();
 
     print("GERALD");
     return FutureBuilder(
@@ -341,7 +359,7 @@ class SavedPercent extends StatelessWidget{
       builder: (ctx, snapshot){
         final data = snapshot.data;
         num temp = (data?.fold(0, (prev, elem) => prev + (prefs.dailyBudget + elem.amount)) ?? 0 )/ prefs.targetAmount;
-        String formattedText = NumberFormat("##0%").format(temp);
+        String formattedText = NumberFormat("##0.0%").format(temp);
         return Text("You have reached $formattedText of your goal");
       },
     );
@@ -449,7 +467,7 @@ class InnerContainer extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 5.0),
         child: Neumorphic(
           style: NeumorphicStyle(
-              color: Theme.of(context).accentColor,
+              color: color ?? Theme.of(context).accentColor,
               shape: NeumorphicShape.flat),
           child: Container(
             height: height * 1.02,
