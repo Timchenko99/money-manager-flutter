@@ -60,7 +60,11 @@ class _MyAppState extends State<MyApp> {
                 fontSize: 36.0,
                 color: Color.fromRGBO(90, 90, 90, 1)),
             headline6:
-                GoogleFonts.roboto(color: Color.fromRGBO(116, 116, 116, 1)),
+
+                GoogleFonts.roboto(
+                    fontSize: 18.0,
+fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(90, 90, 90, 1)),
             subtitle1:
                 GoogleFonts.roboto(color: Color.fromRGBO(116, 116, 116, 1)),
             subtitle2: GoogleFonts.roboto(

@@ -16,6 +16,7 @@ class Overview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // print("FATHER");
+    final theme = Theme.of(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -38,12 +39,12 @@ class Overview extends StatelessWidget {
               children: [
                 OverviewBar(),
                 SizedBox(height: 35),
-                DailyMonthlyToggle(),
-                SizedBox(height: 25),
-                BarChart(),
+                Text("Last Transactions", style: theme.textTheme.headline6),
+                // DailyMonthlyToggle(),
                 SizedBox(height: 20),
+                BarChart(),
+                SizedBox(height: 40),
                 BottomBar()
-
               ],
             ),
           ),
