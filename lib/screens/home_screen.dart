@@ -6,20 +6,22 @@ import 'package:intl/intl.dart';
 
 import 'dart:math';
 
-import './Add.dart';
+import './add_screen.dart';
 
 import '../data/DBHelper.dart';
-import '../data/model/transaction.dart';
+import '../model/UserTransaction.dart';
 import '../data/UserPreferences.dart';
 
 import '../л.dart';
 
-class Home extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
+
+
   @override
-  _HomeState createState() => _HomeState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class _HomeState extends State<Home> {
           key: UniqueKey(),
           onPressed: () async {
             await Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Add()));
+                context, MaterialPageRoute(builder: (context) => AddScreen()));
             //print("redraw");
             setState(() {});
           },

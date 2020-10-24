@@ -1,7 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UserPreferences with ChangeNotifier {
+class UserPreferences {
   static final UserPreferences _instance = UserPreferences._ctor();
 
   factory UserPreferences(){
@@ -22,7 +21,6 @@ class UserPreferences with ChangeNotifier {
 
   set isFirstBoot(bool newValue){
     _prefs.setBool("isFirstBoot", newValue);
-    notifyListeners();
   }
 
   get targetAmount{
@@ -31,7 +29,6 @@ class UserPreferences with ChangeNotifier {
 
   set targetAmount(int newValue){
     _prefs.setInt("targetAmount", newValue);
-    notifyListeners();
 
   }
 
@@ -41,7 +38,6 @@ class UserPreferences with ChangeNotifier {
 
   set dailyBudget(int newValue){
     _prefs.setInt("dailyBudget", newValue);
-    notifyListeners();
   }
 
   get goal{
@@ -50,7 +46,6 @@ class UserPreferences with ChangeNotifier {
 
   set goal(String newValue){
     _prefs.setString("goal", newValue);
-    notifyListeners();
   }
 
 }

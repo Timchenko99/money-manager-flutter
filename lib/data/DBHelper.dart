@@ -1,13 +1,12 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import './model/transaction.dart';
+import '../model/UserTransaction.dart';
 
-class DBHelper with ChangeNotifier{
+class DBHelper{
   static final DBHelper _instance = DBHelper._ctor();
 
   DBHelper._ctor();
@@ -23,7 +22,6 @@ class DBHelper with ChangeNotifier{
 
     // if _database is null we instantiate it
     _database = await initDB();
-    notifyListeners();
     return _database;
   }
 
@@ -32,26 +30,26 @@ class DBHelper with ChangeNotifier{
     String path = join(documentsDirectory.path, "TestDB.db");
     return await openDatabase(path, version: 2, onOpen: (db) {},
         onDowngrade: onDatabaseDowngradeDelete,
-        onUpgrade: (db, oldVersion, newVersion) async{
-          if(oldVersion == 1){
-            db.batch().execute('''
-              DROP TABLE IF EXISTS transactions
-            ''');
-            db.batch().execute('''
-              CREATE TABLE transactions(
-                id INTEGER PRIMARY KEY,
-                amount REAL,
-                type INTEGER,
-                day INTEGER,
-                month INTEGER,
-                year INTEGER,
-                weekday INTEGER
-              
-              )
-            ''');
-          }
-          await db.batch().commit();
-        },
+        // onUpgrade: (db, oldVersion, newVersion) async{
+        //   if(oldVersion == 1){
+        //     db.batch().execute('''
+        //       DROP TABLE IF EXISTS transactions
+        //     ''');
+        //     db.batch().execute('''
+        //       CREATE TABLE transactions(
+        //         id INTEGER PRIMARY KEY,
+        //         amount REAL,
+        //         type INTEGER,
+        //         day INTEGER,
+        //         month INTEGER,
+        //         year INTEGER,
+        //         weekday INTEGER
+        //
+        //       )
+        //     ''');
+        //   }
+        //   await db.batch().commit();
+        // },
         onCreate: (Database db, int version) async {
       await db.execute("CREATE TABLE transactions ("
           "id TEXT PRIMARY KEY,"
@@ -68,7 +66,6 @@ class DBHelper with ChangeNotifier{
 
   Future<void> insert(String table, Map<String, Object> data) async {
     await _database.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
-    notifyListeners();
   }
 
   Future<List<Map<String, dynamic>>> getData(String table) async {
@@ -124,7 +121,6 @@ class DBHelper with ChangeNotifier{
       ) VALUES(?,?,?,?,?,?)
     ''', [newTransaction.amount, newTransaction.type, newTransaction.day, newTransaction.month, newTransaction.year, newTransaction.weekday]);
 
-    notifyListeners();
 
     return result;
   }
@@ -147,19 +143,16 @@ class DBHelper with ChangeNotifier{
     final db = await database;
     int res = await db.update("transactions", newTransaction.toJson(),
         where: "id = ?", whereArgs: [newTransaction.id]);
-    notifyListeners();
     return res;
   }
 
   void delete(int id) async {
     final db = await database;
     db.delete("transactions", where: "id = ?", whereArgs: [id]);
-    notifyListeners();
   }
 
   void deleteAll() async {
     final db = await database;
     db.rawDelete("DELETE FROM transactions");
-    notifyListeners();
   }
 }

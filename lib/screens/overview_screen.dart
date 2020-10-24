@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:moneymanager_simple/data/model/transaction.dart';
 import 'package:provider/provider.dart';
 
 import '../data/DBHelper.dart';
 import '../data/UserPreferences.dart';
+import '../model/UserTransaction.dart';
 
-import './Add.dart';
-import './Settings.dart';
+import './add_screen.dart';
+import './settings_screen.dart';
 
-class Overview extends StatelessWidget {
+class OverviewScreen extends StatelessWidget {
+  static const routeName = "/overview";
 
   @override
   Widget build(BuildContext context) {
@@ -22,43 +23,30 @@ class Overview extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).backgroundColor,
       body: SafeArea(
-
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 25),
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider<UserPreferences>.value(value: UserPreferences()),
-              ChangeNotifierProvider<DBHelper>(
-                create: (ctx)=>DBHelper(),
-              ),
-
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              OverviewBar(),
+              SizedBox(height: 35),
+              Text("Last Transactions", style: theme.textTheme.headline6),
+              // DailyMonthlyToggle(),
+              SizedBox(height: 20),
+              BarChart(),
+              SizedBox(height: 40),
+              BottomBar()
             ],
-            child: Column(
-
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                OverviewBar(),
-                SizedBox(height: 35),
-                Text("Last Transactions", style: theme.textTheme.headline6),
-                // DailyMonthlyToggle(),
-                SizedBox(height: 20),
-                BarChart(),
-                SizedBox(height: 40),
-                BottomBar()
-              ],
-            ),
           ),
         ),
       ),
     );
   }
-
 }
 
 class BottomBarGoal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,14 +57,12 @@ class BottomBarGoal extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Consumer<UserPreferences>(
-          builder: (ctx, prefs, child){
+          builder: (ctx, prefs, child) {
             return Text("${prefs.goal}",
                 style: GoogleFonts.roboto(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(90, 90, 90,
-                        1))
-            );
+                    color: Color.fromRGBO(90, 90, 90, 1)));
           },
         )
       ],
@@ -97,13 +83,14 @@ class BottomBarTarget extends StatelessWidget {
         ),
         SizedBox(height: 4),
         Consumer<UserPreferences>(
-          builder: (ctx, prefs, child){
-            return Text(NumberFormat.compactCurrency(symbol: '\$').format(prefs.targetAmount),
+          builder: (ctx, prefs, child) {
+            return Text(
+                NumberFormat.compactCurrency(symbol: '\$')
+                    .format(prefs.targetAmount),
                 style: GoogleFonts.rubik(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(90, 90, 90,
-                        1)));
+                    color: Color.fromRGBO(90, 90, 90, 1)));
           },
         )
       ],
@@ -118,17 +105,20 @@ class NeumorphicFAB extends StatelessWidget {
       theme: NeumorphicThemeData(),
       child: NeumorphicButton(
         key: UniqueKey(),
-        onPressed: ()  {
+        onPressed: () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Add()));
+              context, MaterialPageRoute(builder: (context) => AddScreen()));
         },
         style: NeumorphicStyle(
             shape: NeumorphicShape.concave,
             intensity: 0.8,
             color: Theme.of(context).accentColor,
             boxShape: NeumorphicBoxShape.circle()),
-        child: Icon(Icons.add,
-          size: 40, color: Colors.black.withOpacity(0.6),),
+        child: Icon(
+          Icons.add,
+          size: 40,
+          color: Colors.black.withOpacity(0.6),
+        ),
       ),
     );
   }
@@ -142,27 +132,32 @@ class BottomBar extends StatelessWidget {
       height: 72,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          BottomBarGoal(),
-          NeumorphicFAB(),
-          BottomBarTarget()
-        ],
+        children: [BottomBarGoal(), NeumorphicFAB(), BottomBarTarget()],
       ),
     );
   }
 }
 
 class BarChart extends StatelessWidget {
-  static  const Map<int, String> intToWeekday = {1:"Mon", 2:"Tue", 3:"Wed", 4:"Thu",5:"Fri",6:"Sat",7:"Sun"};
+  static const Map<int, String> intToWeekday = {
+    1: "Mon",
+    2: "Tue",
+    3: "Wed",
+    4: "Thu",
+    5: "Fri",
+    6: "Sat",
+    7: "Sun"
+  };
 
   @override
   Widget build(BuildContext context) {
     final UserPreferences prefs = Provider.of<UserPreferences>(context);
-    final weekTransactions = Provider.of<DBHelper>(context).getWeekTransactions();
+    final weekTransactions =
+        Provider.of<DBHelper>(context).getWeekTransactions();
 
-    return  FutureBuilder(
+    return FutureBuilder(
       future: weekTransactions,
-        builder: (ctx, snapshot){
+      builder: (ctx, snapshot) {
         // showDialog(
         //   context: context,
         //   builder: (_) => AlertDialog(
@@ -181,45 +176,47 @@ class BarChart extends StatelessWidget {
         //   ),
         //   barrierDismissible: false
         // );
-          final data = snapshot.data as List;
-          // print(DateTime(2020, 9, -1));
+        final data = snapshot.data as List;
+        // print(DateTime(2020, 9, -1));
 
-          List<Widget> neumorphicBars = [];
+        List<Widget> neumorphicBars = [];
 
-          if (data != null && data.isNotEmpty) {
-
-            if(data.length < 7) {
-              for(int i = (7 - data.length); neumorphicBars.length < (7 - data.length); i--){
-                print("i: $i, bars.length: ${neumorphicBars.length}, oldestTransaction: ${data.last.day}, oldestTransaction: ${data.last.amount}, oldestRatio:${data.last.amount.abs() / prefs.dailyBudget},lastTransaction: ${data.first.day}, lastTransactionAmount: ${data.first.amount}, lastRatio:${data.first.amount.abs()/prefs.dailyBudget}");
-                UserTransaction lastTransaction = data.last;
-                DateTime _temp = DateTime(lastTransaction.year, lastTransaction.month, lastTransaction.day - i);
-                neumorphicBars.add(NeumorphicBar(width: 70, height: 200, value: 0, text: intToWeekday[_temp.weekday]));
-              }
+        if (data != null && data.isNotEmpty) {
+          if (data.length < 7) {
+            for (int i = (7 - data.length);
+                neumorphicBars.length < (7 - data.length);
+                i--) {
+              print(
+                  "i: $i, bars.length: ${neumorphicBars.length}, oldestTransaction: ${data.last.day}, oldestTransaction: ${data.last.amount}, oldestRatio:${data.last.amount.abs() / prefs.dailyBudget},lastTransaction: ${data.first.day}, lastTransactionAmount: ${data.first.amount}, lastRatio:${data.first.amount.abs() / prefs.dailyBudget}");
+              UserTransaction lastTransaction = data.last;
+              DateTime _temp = DateTime(lastTransaction.year,
+                  lastTransaction.month, lastTransaction.day - i);
+              neumorphicBars.add(NeumorphicBar(
+                  width: 70,
+                  height: 200,
+                  value: 0,
+                  text: intToWeekday[_temp.weekday]));
             }
+          }
 
-            neumorphicBars.addAll( data.reversed.map<Widget>((v) =>
-                NeumorphicBar(
-                    width: 70,
-                    height: 200,
-                    value: v.amount.abs() / prefs.dailyBudget,
-                    text: "${intToWeekday[v.weekday]}"
-                ),
-            ));
+          neumorphicBars.addAll(data.reversed.map<Widget>(
+            (v) => NeumorphicBar(
+                width: 70,
+                height: 200,
+                value: v.amount.abs() / prefs.dailyBudget,
+                text: "${intToWeekday[v.weekday]}"),
+          ));
+        } else
+          neumorphicBars = _buildDefaultBars();
 
-          } else neumorphicBars = _buildDefaultBars();
-
-          return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: neumorphicBars
-          );
-
-        },
-
-
+        return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: neumorphicBars);
+      },
     );
   }
 
-  List<Widget> _buildDefaultBars(){
+  List<Widget> _buildDefaultBars() {
     return const [
       const NeumorphicBar(width: 70, height: 200, value: 0.5, text: "Mon"),
       const NeumorphicBar(width: 70, height: 200, value: 0.1, text: "Tue"),
@@ -260,10 +257,7 @@ class OverviewBar extends StatelessWidget {
                   SavedPercent(),
                 ],
               ),
-              Positioned(
-                  right: 0,
-                  top: 60,
-                  child: SettingsButton())
+              Positioned(right: 0, top: 60, child: SettingsButton())
             ],
           ),
         ),
@@ -328,14 +322,12 @@ class SettingsButton extends StatelessWidget {
     return NeumorphicTheme(
       child: NeumorphicButton(
         style: NeumorphicStyle(
-            shape: NeumorphicShape.flat,
-            boxShape: NeumorphicBoxShape.circle()
-          // boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15))
-        ),
+            shape: NeumorphicShape.flat, boxShape: NeumorphicBoxShape.circle()
+            // boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15))
+            ),
         onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Settings()));
-
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SettingsScreen()));
         },
         child: const Icon(
           Icons.settings,
@@ -347,8 +339,7 @@ class SettingsButton extends StatelessWidget {
   }
 }
 
-class SavedPercent extends StatelessWidget{
-
+class SavedPercent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prefs = Provider.of<UserPreferences>(context);
@@ -357,9 +348,12 @@ class SavedPercent extends StatelessWidget{
     print("GERALD");
     return FutureBuilder(
       future: sumByDay,
-      builder: (ctx, snapshot){
+      builder: (ctx, snapshot) {
         final data = snapshot.data;
-        num temp = (data?.fold(0, (prev, elem) => prev + (prefs.dailyBudget + elem.amount)) ?? 0 )/ prefs.targetAmount;
+        num temp = (data?.fold(0,
+                    (prev, elem) => prev + (prefs.dailyBudget + elem.amount)) ??
+                0) /
+            prefs.targetAmount;
         String formattedText = NumberFormat("##0.0%").format(temp);
         return Text("You have reached $formattedText of your goal");
       },
@@ -376,19 +370,20 @@ class SavedTotal extends StatelessWidget {
     print("GERALD");
     return StreamBuilder(
       stream: sumByDay.asStream(),
-      builder: (ctx, snapshot){
+      builder: (ctx, snapshot) {
         final data = snapshot.data;
-             //print(snapshot.data[0].amount);
+        //print(snapshot.data[0].amount);
 
-             num temp = data?.fold(0, (prev, elem) => prev + (prefs.dailyBudget + elem.amount)) ?? 0;
-             // return Text("\$62 000 000", style: Theme.of(context).textTheme.headline5,);
-             return Text(NumberFormat.currency(symbol: "\$").format(temp),
-                 style: Theme.of(context).textTheme.headline5);
+        num temp = data?.fold(
+                0, (prev, elem) => prev + (prefs.dailyBudget + elem.amount)) ??
+            0;
+        // return Text("\$62 000 000", style: Theme.of(context).textTheme.headline5,);
+        return Text(NumberFormat.currency(symbol: "\$").format(temp),
+            style: Theme.of(context).textTheme.headline5);
       },
     );
   }
 }
-
 
 class NeumorphicBar extends StatelessWidget {
   const NeumorphicBar({
@@ -438,7 +433,6 @@ class NeumorphicBar extends StatelessWidget {
         SizedBox(height: 10),
         Text(
           text,
-
           style: TextStyle(
             color: Colors.blueGrey[300],
           ),
@@ -502,5 +496,3 @@ class DugContainer extends StatelessWidget {
     );
   }
 }
-
-

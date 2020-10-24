@@ -4,16 +4,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:uuid/uuid.dart';
 
-import '../data/model/transaction.dart';
+import '../model/UserTransaction.dart';
 import '../data/DBHelper.dart';
 
 
-class Add extends StatefulWidget {
+class AddScreen extends StatefulWidget {
   @override
-  _AddState createState() => _AddState();
+  _AddScreenState createState() => _AddScreenState();
 }
 
-class _AddState extends State<Add> {
+class _AddScreenState extends State<AddScreen> {
   final _amountTextController = TextEditingController();
   int _selectedIndex = 0;
 
