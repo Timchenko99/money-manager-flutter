@@ -1,5 +1,7 @@
 import 'package:android_alarm_manager/android_alarm_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:moneymanager_simple/screens/add_screen.dart';
 import 'package:provider/provider.dart';
 
 import './providers/DBProvider.dart';
@@ -38,6 +40,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+  String getStartScreen(bool isFirstBoot){
+    return isFirstBoot ? StartScreen.routeName : HomeScreen.routeName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -55,14 +62,26 @@ class _MyAppState extends State<MyApp> {
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.deepPurple,
+          inputDecorationTheme: InputDecorationTheme(
+
+            labelStyle: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 16),
+              border: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  )
+              )
+          )
         ),
         home: HomeScreen(),
-        initialRoute: StartScreen.routeName,
+        //TODO: use preferences
+        initialRoute: getStartScreen(false),
         routes: {
           StartScreen.routeName: (ctx) => StartScreen(),
           OverviewScreen.routeName: (ctx) => OverviewScreen(),
           NewTarget.routeName: (ctx) => NewTarget(),
-          // OverviewScreen.routeName: (ctx) => OverviewScreen(),
+          HomeScreen.routeName: (ctx) => HomeScreen(),
+          AddScreen.routeName: (ctx) => AddScreen(),
           // OverviewScreen.routeName: (ctx) => OverviewScreen(),
 
         }

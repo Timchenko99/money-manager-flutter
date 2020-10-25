@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:moneymanager_simple/screens/overview_screen.dart';
 
+import '../screens/home_screen.dart';
 import '../core/styles.dart';
 
 class NewTarget extends StatefulWidget {
@@ -60,6 +60,7 @@ class _NewTargetName extends StatelessWidget {
     //TODO: save data to prefs
     _pageController.animateToPage(1, duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
   }
+  //TODO: create TextEditingController in initState and dispose
 
   @override
   Widget build(BuildContext context) {
@@ -73,14 +74,7 @@ class _NewTargetName extends StatelessWidget {
             Text("What are you saving for?", style: GoogleFonts.rubik(fontWeight: FontWeight.bold, fontSize: 24.0),),
             TextField(
               onSubmitted: (_)=>_navigateToNext(),
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
-                  )
-                )
-              ),
+
             )
           ],
         ),
@@ -99,6 +93,7 @@ class _NewTargetAmount extends StatelessWidget {
 
 
   _NewTargetAmount(this._pageController);
+
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +121,7 @@ class _NewTargetAmount extends StatelessWidget {
         ),
         FlatButton(
           //TODO: save data to prefs and show home screen
-          onPressed: () => Navigator.of(context).pushReplacementNamed(OverviewScreen.routeName),
+          onPressed: () => Navigator.of(context).pushReplacementNamed(HomeScreen.routeName),
           child: Text("Confirm", style: GoogleFonts.roboto(fontWeight: FontWeight.w300, fontSize: 24.0, color: Color(0xFF8769FF)),),
         )
       ],
