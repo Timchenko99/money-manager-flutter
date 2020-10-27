@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moneymanager_simple/data/models/TransactionModel.dart';
+import 'package:moneymanager_simple/presentation/cubit/TransactionCubit.dart';
+import 'package:uuid/uuid.dart';
 
-import '../core/styles.dart';
+import '../../core/styles.dart';
 
 class AddScreen extends StatelessWidget {
   static const routeName = "/add-screen";
@@ -48,7 +52,10 @@ class AddScreen extends StatelessWidget {
                       child: Text("CANCEL"),
                     ),
                     RaisedButton(
-                      onPressed: (){},
+                      onPressed: (){
+                        BlocProvider.of<TransactionCubit>(context).insertTransaction(TransactionModel(id: Uuid().v1(), date: DateTime.now(), amount: 100.0, icon: Icons.add_circle_outline, title: "New"));
+                        Navigator.of(context).pop();
+                      },
                       child: Text("ADD"),
                     )
                   ],

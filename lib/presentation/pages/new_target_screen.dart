@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:moneymanager_simple/presentation/widgets/BottomWideButton.dart';
 
-import '../screens/home_screen.dart';
-import '../core/styles.dart';
+import './home_screen.dart';
+import '../../core/styles.dart';
 
 class NewTarget extends StatefulWidget {
   static const routeName = "/new-target";
@@ -40,8 +41,9 @@ class _NewTargetState extends State<NewTarget> {
             controller: _pageController,
             physics: NeverScrollableScrollPhysics(),
             children: [
-              _NewTargetName(_pageController),
-              _NewTargetAmount(_pageController)
+              NewTargetName(_pageController),
+              NewTargetAmount(_pageController),
+              NewTargetDailyBudget(_pageController)
             ],
           ),
         ),
@@ -50,17 +52,18 @@ class _NewTargetState extends State<NewTarget> {
   }
 }
 
-class _NewTargetName extends StatelessWidget {
+class NewTargetName extends StatelessWidget {
+
   final PageController _pageController;
 
+  NewTargetName(this._pageController);
 
-  _NewTargetName(this._pageController);
 
   void _navigateToNext(){
     //TODO: save data to prefs
     _pageController.animateToPage(1, duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
   }
-  //TODO: create TextEditingController in initState and dispose
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,12 +90,11 @@ class _NewTargetName extends StatelessWidget {
   }
 }
 
-
-class _NewTargetAmount extends StatelessWidget {
+class NewTargetAmount extends StatelessWidget {
   final PageController _pageController;
 
 
-  _NewTargetAmount(this._pageController);
+  NewTargetAmount(this._pageController);
 
 
   @override
@@ -121,7 +123,7 @@ class _NewTargetAmount extends StatelessWidget {
         ),
         FlatButton(
           //TODO: save data to prefs and show home screen
-          onPressed: () => Navigator.of(context).pushReplacementNamed(HomeScreen.routeName),
+          onPressed: () => _pageController.animateToPage(2, duration: Duration(milliseconds: 250), curve: Curves.easeInOut),
           child: Text("Confirm", style: GoogleFonts.roboto(fontWeight: FontWeight.w300, fontSize: 24.0, color: Color(0xFF8769FF)),),
         )
       ],
@@ -161,6 +163,54 @@ class _TargetAndAmountState extends State<TargetAndAmount> {
               _currentSliderValue = value;
             });
           },
+        )
+      ],
+    );
+  }
+}
+
+
+class NewTargetDailyBudget extends StatelessWidget {
+
+  final PageController _pageController;
+
+  NewTargetDailyBudget(this._pageController);
+
+
+  void _navigateToNext(BuildContext context){
+    //TODO: save data to prefs
+    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IconButton(
+                onPressed: () => _pageController.animateToPage(1, duration: Duration(milliseconds: 250), curve: Curves.easeInOut),
+                icon: Icon(Icons.arrow_back, size: 36.0, color: Theme.of(context).primaryColor)
+            ),
+            Center(child: Text("New Target", style: GoogleFonts.rubik(fontWeight: FontWeight.bold, fontSize: 36.0),)),
+          ],
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("What is your daily budget?", style: GoogleFonts.rubik(fontWeight: FontWeight.bold, fontSize: 24.0),),
+            TextField(
+              onSubmitted: (_)=>_navigateToNext(context),
+
+            )
+          ],
+        ),
+        BottomWideButton(
+          title: "Set My Goal",
+          onPressed: ()=>_navigateToNext(context),
         )
       ],
     );

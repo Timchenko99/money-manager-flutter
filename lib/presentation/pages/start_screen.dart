@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../screens/new_target_screen.dart';
-import '../core/styles.dart';
+import './new_target_screen.dart';
+import '../../core/styles.dart';
 import '../widgets/BottomWideButton.dart';
 
 class StartScreen extends StatelessWidget {
@@ -62,6 +62,7 @@ class Content extends StatelessWidget {
         height: mediaQuery.size.height * 0.05,
       ),
       BottomWideButton(
+        title: "Start",
         onPressed: ()=> Navigator.of(context).pushReplacementNamed(NewTarget.routeName),
       )
     ]);
@@ -69,6 +70,7 @@ class Content extends StatelessWidget {
 }
 
 class Splash extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class BottomWideButton extends StatelessWidget {
   final Function onPressed;
+  final String title;
 
 
-  BottomWideButton({this.onPressed});
+  BottomWideButton({@required this.onPressed, @required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,7 @@ class BottomWideButton extends StatelessWidget {
         color: Theme.of(context).primaryColor,
         onPressed: onPressed,
         child: Text(
-          "Start",
+          title,
           style: GoogleFonts.roboto(
               fontWeight: FontWeight.w300, fontSize: 16, color: Colors.white),
         ),

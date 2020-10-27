@@ -1,14 +1,16 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:moneymanager_simple/screens/add_screen.dart';
+import 'package:moneymanager_simple/presentation/cubit/TransactionCubit.dart';
 import 'dart:math';
 
-import '../core/styles.dart';
-import '../model/UserTransaction.dart';
-import '../л.dart';
+import './add_screen.dart';
+import '../../core/styles.dart';
+import '../../data/models/TransactionModel.dart';
+import '../../л.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = "/home";
@@ -128,55 +130,72 @@ class ScrollWithoutGlowBehavior extends ScrollBehavior {
 class TransactionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    context.bloc<TransactionCubit>().getAllTransactions();
+
     return Container(
       // color: Colors.grey,
       height: MediaQuery.of(context).size.height * 0.3,
       child: ScrollConfiguration(
         behavior: ScrollWithoutGlowBehavior(),
-        child: ListView.separated(
-            itemCount: 5,
-            separatorBuilder: (ctx, index) => DottedLine(dashLength: 1.0),
-            itemBuilder: (ctx, index) {
-              return ListTile(
-                leading: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.healing,
-                      size: 32.0,
-                    )
-                  ],
-                ),
-                title: Text(
-                  "Medical Center",
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.0,
-                  ),
-                ),
-                subtitle: Text(
-                  "07.01.2020",
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 12.0,
-                  ),
-                ),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "- 600",
+        child: BlocBuilder<TransactionCubit, TransactionState>(
+          builder: (context, state) {
+
+            if(state is TransactionLoadingState){
+              return Container();
+            }
+            else if(state is TransactionLoadedState){
+              final transactions = state.transactions;
+            return ListView.separated(
+                itemCount: transactions.length,
+                separatorBuilder: (ctx, index) => DottedLine(dashLength: 1.0),
+                itemBuilder: (ctx, index) {
+                  return ListTile(
+                    leading: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          transactions[index].icon,
+                          size: 32.0,
+                        )
+                      ],
+                    ),
+                    title: Text(
+                      transactions[index].title,
                       style: GoogleFonts.roboto(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16.0,
                       ),
-                    )
-                  ],
-                ),
-              );
-            }),
+                    ),
+                    subtitle: Text(
+                      transactions[index].date.toIso8601String(),
+                      style: GoogleFonts.roboto(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          transactions[index].amount.floor().toString(),
+                          style: GoogleFonts.roboto(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0,
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                });
+            }else{
+              return Container();
+            }
+
+
+          },
+        )
       ),
     );
   }
@@ -305,7 +324,7 @@ class PieProgress extends StatelessWidget {
           foregroundPainter: PieChartPainter(
               width: strokeWidth,
               color: Theme.of(context).primaryColor,
-              transactions: [UserTransaction()]),
+              transactions: [TransactionModel()]),
         ),
       ),
     );
@@ -380,7 +399,7 @@ class PieChartPainter extends CustomPainter {
       @required this.color});
 
   final double width;
-  final List<UserTransaction> transactions;
+  final List<TransactionModel> transactions;
   final Color color;
 
   @override
