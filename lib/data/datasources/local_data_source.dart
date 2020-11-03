@@ -12,6 +12,7 @@ abstract class LocalDataSource{
   Future<List<TransactionModel>> getAllTransactions();
   Future<int> insertTransaction(TransactionModel transactionModel);
   Future<int> deleteTransaction(String id);
+  Future<List<TransactionModel>> getTotalSpenditudeByDate();
 
 }
 
@@ -58,15 +59,18 @@ class TransactionLocalDataSourceImpl implements LocalDataSource{
               "title Text,"
               "amount REAL,"
               "date TEXT,"
+              "day INTEGER,"
+              "month INTEGER,"
+              "_year INTEGER,"
               "iconCode INT,"
               "iconFamily TEXT,"
-              "iconPackage TEXT,"
+              "iconPackage TEXT"
               ")");
         });
   }
 
 
-    @override
+  @override
   Future<TransactionModel> getConcreteTransaction(String id) async{
     return (await database).query(TABLE_NAME, where: '"id" = ?', whereArgs: [id]).then((value) => TransactionModel.fromJson(value[0]));
   }
@@ -85,4 +89,11 @@ class TransactionLocalDataSourceImpl implements LocalDataSource{
   Future<int> insertTransaction(TransactionModel transactionModel) async{
     return (await database).insert(TABLE_NAME, transactionModel.toJson());
   }
+
+  @override
+  Future<List<TransactionModel>> getTotalSpenditudeByDate() async{
+    return (await database).rawQuery("SELECT id, iconCode, iconFamily, date,iconPackage,SUM(amount) as amount, day, month, _year FROM transactions GROUP BY day, month, _year;").then((value) => value.map((e) => TransactionModel.fromJson(e)).toList());
+  }
+
+
 }

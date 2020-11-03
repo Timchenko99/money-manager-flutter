@@ -33,6 +33,20 @@ class TransactionRepositoryImpl implements TransactionRepository{
     return _deleteTransaction(localDataSource.deleteTransaction(id));
   }
 
+  @override
+  Future<Either<Failure, List<Transaction>>> getTotalSpenditudeByDate(){
+    return _getTotalSpenditudeByDate(localDataSource.getTotalSpenditudeByDate());
+  }
+  @override
+  Future<Either<Failure, List<Transaction>>> _getTotalSpenditudeByDate(Future<List<Transaction>> totalByDate) async{
+    try{
+      final transaction = await totalByDate;
+      return Right(transaction);
+    } on LocalDataException {
+      return Left(LocalDataFailure());
+    }
+  }
+
   Future<Either<Failure, Transaction>> _getTransaction(Future<Transaction> getConcrete) async{
     try{
       final transaction = await getConcrete;
@@ -68,5 +82,7 @@ class TransactionRepositoryImpl implements TransactionRepository{
       return Left(LocalDataFailure());
     }
   }
+
+
   
 }

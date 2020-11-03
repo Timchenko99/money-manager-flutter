@@ -4,13 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:moneymanager_simple/presentation/cubit/TransactionCubit.dart';
+import 'package:moneymanager_simple/data/UserPreferences.dart';
+import 'package:moneymanager_simple/presentation/pages/overview_screen.dart';
 import 'dart:math';
 
-import './add_screen.dart';
 import '../../core/styles.dart';
 import '../../data/models/TransactionModel.dart';
 import '../../л.dart';
+import '../cubit/TransactionCubit.dart';
+import './add_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = "/home";
@@ -30,6 +32,8 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
+                    alignment: Alignment.center,
+
                     onPressed: () {},
                     icon: Icon(
                       Icons.settings,
@@ -39,7 +43,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () =>
-                    //TODO: use .then() to update home screen
                         Navigator.of(context).pushNamed(AddScreen.routeName),
                     icon: Icon(
                       Icons.add_circle_outline,
@@ -101,7 +104,9 @@ class TransactionHistory extends StatelessWidget {
               ),
             ),
             FlatButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed(OverviewScreen.routeName);
+              },
               child: Text(
                 "See All",
                 style: GoogleFonts.roboto(
@@ -144,7 +149,7 @@ class TransactionList extends StatelessWidget {
               return Container();
             }
             else if(state is TransactionLoadedState){
-              final transactions = state.transactions;
+              final transactions = state.transactions.reversed.toList();
             return ListView.separated(
                 itemCount: transactions.length,
                 separatorBuilder: (ctx, index) => DottedLine(dashLength: 1.0),
@@ -168,7 +173,7 @@ class TransactionList extends StatelessWidget {
                       ),
                     ),
                     subtitle: Text(
-                      transactions[index].date.toIso8601String(),
+                      DateFormat.yMd().format(transactions[index].date),
                       style: GoogleFonts.roboto(
                         fontWeight: FontWeight.w400,
                         fontSize: 12.0,
@@ -269,14 +274,21 @@ class InnerRing extends StatelessWidget {
           ],
         ),
         child: Center(
-          child: Text(
-            "${NumberFormat("##0%").format(1 /*transactions.fold(0, (previousValue, element) => previousValue + element.amount) 1 / UserPreferences().dailyBudget*/)}",
-            style: GoogleFonts.rubik(
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              fontSize: 18.0,
-            ),
-          ),
+          child: BlocBuilder<TransactionCubit, TransactionState>(
+            builder: (context, state) {
+              if(state is TransactionLoadedState){
+                final dayTotal = state.transactions.where((element) => element.date.day == DateTime.now().day && element.date.month == DateTime.now().month && element.date.year == DateTime.now().year).fold(0, (previousValue, element) => previousValue + element.amount);
+                return Text(
+                  "${NumberFormat("##0%").format(dayTotal / UserPreferences().dailyBudget)}",
+                  style: GoogleFonts.rubik(
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 18.0,
+                  ),
+                );
+              }else return Container();
+            },
+          )
         ),
         // child: Text("${NumberFormat("##0%").format(transactions.fold(0, (previousValue, element) => previousValue + element.amount)/UserPreferences().monthBalance)}", style: GoogleFonts.rubik(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 18.0, color: Color.fromRGBO(185, 99, 99, 1) )),
       ),
@@ -319,13 +331,19 @@ class PieProgress extends StatelessWidget {
     return Center(
       child: SizedBox(
         width: width,
-        child: CustomPaint(
-          child: Center(),
-          foregroundPainter: PieChartPainter(
-              width: strokeWidth,
-              color: Theme.of(context).primaryColor,
-              transactions: [TransactionModel()]),
-        ),
+        child: BlocBuilder<TransactionCubit, TransactionState>(
+          builder: (context, state) {
+            if(state is TransactionLoadedState){
+              return CustomPaint(
+                child: Center(),
+                foregroundPainter: PieChartPainter(
+                    width: strokeWidth,
+                    color: Theme.of(context).primaryColor,
+                    transactions: state.transactions),
+              );
+            }else return Container();
+          },
+        )
       ),
     );
   }
@@ -426,10 +444,16 @@ class PieChartPainter extends CustomPainter {
     // double total = 0;
     // categories.forEach((expenses)=> total += expenses.amount);
 
+    // final currentDayExpenses = transactions.fold(0, (previousValue, element) => previousValue + element.amount);
+    final dayTotal = transactions.where((element) => element.date.day == DateTime.now().day && element.date.month == DateTime.now().month && element.date.year == DateTime.now().year).fold(0, (previousValue, element) => previousValue + element.amount);
+    double expensesRatio = dayTotal / UserPreferences().dailyBudget;
+    if(expensesRatio > UserPreferences().dailyBudget)expensesRatio = 100;
+    if(expensesRatio < 0)expensesRatio = 0;
+
     double startRadian = -pi / 2;
     paint.color = color;
     canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startRadian,
-        ((1 / /*UserPreferences().dailyBudget*/ 2) * 2 * pi), false, paint);
+        (expensesRatio * 2 * pi), false, paint);
 
     // for (var index = 0; index < categories.length; index++){
     //   final currentCategory = categories.elementAt(index);

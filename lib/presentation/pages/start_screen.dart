@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moneymanager_simple/core/error/exceptions.dart';
+import 'package:moneymanager_simple/data/UserPreferences.dart';
+import 'package:moneymanager_simple/data/models/PreferenceModel.dart';
+import 'package:moneymanager_simple/presentation/cubit/PreferenceCubit.dart';
+import 'package:moneymanager_simple/presentation/pages/home_screen.dart';
 
 import './new_target_screen.dart';
 import '../../core/styles.dart';
@@ -10,6 +16,8 @@ class StartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    UserPreferences().isFirstBoot = false;
+
     return Scaffold(
       body: SafeArea(
         child: Container(

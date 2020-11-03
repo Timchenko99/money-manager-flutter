@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moneymanager_simple/data/models/TransactionModel.dart';
 import 'package:moneymanager_simple/presentation/cubit/TransactionCubit.dart';
@@ -25,13 +26,15 @@ class AddScreen extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.all(0),
                       onPressed: (){
                         FocusScope.of(context).requestFocus(FocusNode());
                         Navigator.pop(context);
                       },
                       icon: Icon(
-                        Icons.keyboard_backspace,
-                        size: 36.0,
+                        Icons.arrow_back,
+                        size: 32.0,
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
@@ -45,21 +48,7 @@ class AddScreen extends StatelessWidget {
                   ),
                 ),
                 UserInput(),
-                ButtonBar(
-                  children: [
-                    FlatButton(
-                      onPressed: (){},
-                      child: Text("CANCEL"),
-                    ),
-                    RaisedButton(
-                      onPressed: (){
-                        BlocProvider.of<TransactionCubit>(context).insertTransaction(TransactionModel(id: Uuid().v1(), date: DateTime.now(), amount: 100.0, icon: Icons.add_circle_outline, title: "New"));
-                        Navigator.of(context).pop();
-                      },
-                      child: Text("ADD"),
-                    )
-                  ],
-                )
+
               ],
             ),
           ),
@@ -79,6 +68,7 @@ class _UserInputState extends State<UserInput> {
   TextEditingController _categoryController;
   TextEditingController _amountController;
   TextEditingController _dateController;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -98,59 +88,119 @@ class _UserInputState extends State<UserInput> {
     _dateController.dispose();
   }
 
+  Icon _icon = Icon(Icons.add_circle);
+  DateTime _dateTime;
+
+  _pickIcon(BuildContext context) async {
+    IconData icon = await FlutterIconPicker.showIconPicker(context, iconPackMode: IconPack.material);
+
+    _icon = Icon(icon);
+    setState((){});
+
+    debugPrint('Picked Icon:  $icon');
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
 
-    return Column(
-      children: [
-        TextField(
-          controller: _transactionController,
-          style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
-
-          decoration: InputDecoration(labelText: "Transaction"),
-        ),
-        SizedBox(
-          height: media.size.height * 0.04,
-        ),
-        TextField(
-          controller: _categoryController,
-          style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
-          decoration: InputDecoration(labelText: "Category"),
-        ),
-        SizedBox(
-          height: media.size.height * 0.04,
-        ),
-        TextField(
-          controller: _amountController,
-          style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
-          decoration: InputDecoration(labelText: "Amount"),
-        ),
-        SizedBox(
-          height: media.size.height * 0.04,
-        ),
-        InputDatePickerFormField(
-          fieldHintText: "dd.mm.yyyy",
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2010),
-          lastDate: DateTime.now(),
-        )
-        /*TextField(
-          style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
-          decoration: InputDecoration(
-            labelText: "Date",
-            suffix: IconButton(
-              onPressed: () {
-                showDatePicker(context: context, initialDate: null, firstDate: null, lastDate: null)
-              },
-              icon: Icon(
-                Icons.date_range,
-                color: Theme.of(context).primaryColor,
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            validator: (value){
+              if(value.isEmpty){
+                return "Please enter some text";
+              }else{
+                return null;
+              }
+            },
+            controller: _transactionController,
+            style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
+            decoration: InputDecoration(
+                prefixIcon: IconButton(
+                  onPressed: ()=>_pickIcon(context),
+                  icon: _icon, color: Theme.of(context).primaryColor,),
+                labelText: "Title"),
+          ),
+          SizedBox(
+            height: media.size.height * 0.04,
+          ),
+          // TextFormField(
+          //   validator: (value){
+          //     if(value.isEmpty){
+          //       return "Please enter some text";
+          //     }else{
+          //       return null;
+          //     }
+          //   },
+          //   controller: _categoryController,
+          //   style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
+          //   decoration: InputDecoration(labelText: "Category"),
+          // ),
+          // SizedBox(
+          //   height: media.size.height * 0.04,
+          // ),
+          TextFormField(
+            validator: (value){
+              if(value.isEmpty){
+                return "Please enter some text";
+              }else{
+                return null;
+              }
+            },
+            controller: _amountController,
+            style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
+            decoration: InputDecoration(labelText: "Amount"),
+          ),
+          SizedBox(
+            height: media.size.height * 0.04,
+          ),
+          InputDatePickerFormField(
+            fieldHintText: "dd.mm.yyyy",
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2010),
+            lastDate: DateTime.now(),
+            onDateSaved: (value) => _dateTime = value,
+          ),
+          /*TextField(
+            style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 18),
+            decoration: InputDecoration(
+              labelText: "Date",
+              suffix: IconButton(
+                onPressed: () {
+                  showDatePicker(context: context, initialDate: null, firstDate: null, lastDate: null)
+                },
+                icon: Icon(
+                  Icons.date_range,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             ),
-          ),
-        ),*/
-      ],
+          ),*/
+          ButtonBar(
+            children: [
+              FlatButton(
+                onPressed: (){},
+                child: Text("CANCEL"),
+              ),
+              RaisedButton(
+                onPressed: (){
+                  if(_formKey.currentState.validate()){
+                    _formKey.currentState.save();
+                    final newTransaction = TransactionModel(id: Uuid().v1(), date: _dateTime, amount: double.parse(_amountController.text), icon: _icon.icon, title: _transactionController.text);
+                    BlocProvider.of<TransactionCubit>(context).insertTransaction(newTransaction);
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: Text("ADD"),
+              )
+            ],
+          )
+        ],
+      ),
+
     );
   }
 }

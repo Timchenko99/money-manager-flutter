@@ -8,4 +8,5 @@ abstract class TransactionRepository{
   Future<Either<Failure, Transaction>> getConcreteTransaction(String id);
   Future<Either<Failure, int>> insertTransaction(Transaction transaction);
   Future<Either<Failure, int>> deleteTransaction(String id);
+  Future<Either<Failure,List<Transaction>>> getTotalSpenditudeByDate();
 }

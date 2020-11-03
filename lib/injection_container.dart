@@ -1,5 +1,6 @@
 
 import 'package:get_it/get_it.dart';
+import 'package:moneymanager_simple/domain/usecases/GetTotalByDate.dart';
 import 'package:moneymanager_simple/presentation/cubit/TransactionCubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,8 @@ import './domain/usecases/WritePreferences.dart';
 
 import './domain/usecases/GetConcreteTransaction.dart';
 import './domain/usecases/DeleteTransaction.dart';
+import 'presentation/cubit/PreferenceCubit.dart';
+import 'presentation/cubit/TransactionsByDateCubit.dart';
 
 final serviceLocator = GetIt.instance;
 
@@ -43,6 +46,15 @@ Future<void> init() async{
     insertTransactionCase: serviceLocator(),
     deleteTransactionCase: serviceLocator()
   ));
+
+  serviceLocator.registerFactory(() => TransactionsByDateCubit(
+    getTotalByDate: serviceLocator()
+  ));
+
+  serviceLocator.registerLazySingleton(() => PreferenceCubit(
+    writePreferencesUseCase: serviceLocator(),
+    getPreferencesUseCase: serviceLocator()
+  ));
   //Use cases
   serviceLocator.registerLazySingleton(() => GetConcreteTransaction(
       repository: serviceLocator()
@@ -54,6 +66,7 @@ Future<void> init() async{
   serviceLocator.registerLazySingleton(() => GetPreferences(serviceLocator()));
   serviceLocator.registerLazySingleton(() => WritePreferences(serviceLocator()));
 
+  serviceLocator.registerLazySingleton(() => GetTotalByDate(serviceLocator()));
 
   // serviceLocator.registerFactory(() => PreferencesProvider(serviceLocator()));
 

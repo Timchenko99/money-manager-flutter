@@ -7,6 +7,7 @@ import 'package:moneymanager_simple/domain/entities/Transaction.dart';
 import 'package:moneymanager_simple/domain/usecases/DeleteTransaction.dart';
 import 'package:moneymanager_simple/domain/usecases/GetAllTransactions.dart';
 import 'package:moneymanager_simple/domain/usecases/GetConcreteTransaction.dart';
+import 'package:moneymanager_simple/domain/usecases/GetTotalByDate.dart';
 import 'package:moneymanager_simple/domain/usecases/InsertTransaction.dart';
 
 
@@ -32,4 +33,5 @@ class TransactionCubit extends Cubit<TransactionState>{
     await insertTransactionCase(InsertTransactionParams(transaction));
     this.getAllTransactions();
   }
+
 }

@@ -1,18 +1,230 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_neumorphic/flutter_neumorphic.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:intl/intl.dart';
-// import 'package:provider/provider.dart';
-//
-// import '../../data/DBHelper.dart';
-// import '../../data/UserPreferences.dart';
-// import '../../data/models/TransactionModel.dart';
-//
-// import 'add_screen.dart';
-// import './settings_screen.dart';
-//
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:moneymanager_simple/core/styles.dart';
+import 'package:moneymanager_simple/data/UserPreferences.dart';
+import 'package:moneymanager_simple/data/repositories/TransactionRepositoryImpl.dart';
+import 'package:moneymanager_simple/presentation/cubit/TransactionCubit.dart';
+import 'package:moneymanager_simple/presentation/cubit/TransactionsByDateCubit.dart';
+
+class OverviewScreen extends StatelessWidget {
+  static const routeName = "/overview";
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          decoration: BoxDecoration(
+            gradient: Styles.backgroundGradient
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.all(0),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                        Icons.arrow_back,
+                        size: 32.0,
+                        color: Theme.of(context).primaryColor,
+                    ),
+                  )
+                ],
+              ),
+              Text(
+                "Overview",
+                style: GoogleFonts.rubik(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 36.0,
+                ),
+              ),
+              SizedBox(
+                height: 40.0,
+              ),
+              OverviewCard(),
+              SizedBox(
+                height: 40.0,
+              ),
+              BarChart(),
+              SizedBox(
+                height: 35.0,
+              ),
+              TargetInfo()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OverviewCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    context.bloc<TransactionsByDateCubit>().getTotalSpenditudeByDate();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: BlocBuilder<TransactionsByDateCubit, TransactionsByDateState>(
+        builder: (context, state) {
+          if(state is TotalByDateLoadingState){
+            return Container();
+          }
+          else if(state is TotalByDateLoadedState){
+            final transactions = state.transactions;
+            final total = transactions.fold(0.0, (previousValue, element) => previousValue + (UserPreferences().dailyBudget - element.amount));
+            final totalRatio = total/UserPreferences().targetAmount;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Total amount saved", style: GoogleFonts.roboto(fontWeight: FontWeight.w400, fontSize: 20.0),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("${NumberFormat.simpleCurrency().format(total)}", style: GoogleFonts.robotoMono(fontWeight: FontWeight.w600,fontSize: 26),),
+                    IconButton(
+                      iconSize: 36,
+                      onPressed: () {},
+                      icon: Icon(Icons.settings, color: Theme.of(context).primaryColor,),
+                    )
+                  ],
+                ),
+                Text("You have reached ${NumberFormat.percentPattern().format(totalRatio)} of your goal", style: GoogleFonts.roboto(fontWeight: FontWeight.w400, fontSize: 16.0)),
+              ],
+            );
+          }else{
+            return Container();
+          }
+        },
+      )
+    );
+  }
+}
+
+
+
+class BarChart extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+
+    return Container(
+      height: mediaQuery.size.height * 0.43,
+      child: BlocBuilder<TransactionCubit, TransactionState>(
+        builder: (context, state) {
+          if(state is TransactionLoadingState){
+            return Container();
+          }
+          else if(state is TransactionLoadedState){
+            final transactions = state.transactions.reversed.toList();
+            final weekdays = List.generate(7, (index) => DateTime.now().subtract(Duration(days: index)));
+            final barChartItems = weekdays.map((weekday){
+              final totalSpend = transactions.where((transaction) => (transaction.date.day == weekday.day && transaction.date.month == weekday.month && transaction.date.year == weekday.year)).fold(0.0, (previousValue, element) => previousValue + element.amount);
+              final totalRatio = totalSpend / UserPreferences().dailyBudget;
+              return BarChartItem(amountPct: totalRatio, amount: totalSpend, date: weekday);
+            }).toList();
+            barChartItems.sort((a,b)=> a.date.compareTo(b.date));
+            // transactions.sort((t1, t2)=> t1.date.millisecondsSinceEpoch.compareTo(t2.date.millisecondsSinceEpoch) );
+            // return Row(children: transactions.reversed.take(7).map((t) => BarChartItem(amountPct: , amount: , date: ,)));
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: barChartItems,);
+          }else{
+            return Container();
+          }
+        },
+      )
+    );
+  }
+}
+
+class BarChartItem extends StatelessWidget {
+  final double amountPct;
+  final double amount;
+  final DateTime date;
+
+
+  BarChartItem({this.amountPct, this.amount, this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text("${NumberFormat.compactSimpleCurrency().format(amount)}"),
+        SizedBox(
+          height: 4,
+        ),
+        Container(
+          height: 250,
+          width: 15,
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.black12
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: FractionallySizedBox(
+                  heightFactor: amountPct,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.circular(30)
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 4,
+        ),
+        Text("${DateFormat.E().format(date)}", style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black38),)
+
+      ],
+    );
+  }
+}
+
+
+class TargetInfo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Text("Current Goal", ), Text("${UserPreferences().goal}", style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 20),)],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [Text("Targeted Amount"), Text("${NumberFormat.simpleCurrency().format(UserPreferences().targetAmount)}", style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 20))],
+          )
+        ],
+      ),
+    );
+  }
+}
+
 // class OverviewScreen extends StatelessWidget {
-//   static const routeName = "/overview";
 //
 //   @override
 //   Widget build(BuildContext context) {
